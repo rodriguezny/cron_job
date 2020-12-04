@@ -5,25 +5,23 @@ const SMTPTransport = require('nodemailer/lib/smtp-transport');
 
 const app = express();
 
-cron.schedule("* * * * *", async () => {
-    console.log('Running cron job');
-
-    let testAccount = await nodeMailer.createTestAccount((err) => {
+let testAccount = nodeMailer.createTestAccount((err) => {
         if(err) {
             console.error('Failed to create test account. ' + err.message)
             return process.exit(1);
         }
         console.log('Credentials obtained, sending message...')
     });
-    let user = testAccount.user;
-    let pass = testAccount.pass;
+cron.schedule("* * * * *", async () => {
+    console.log('Running cron job');
+    
     let transporter = nodeMailer.createTransport(new SMTPTransport({
         host: 'smtp.ethereal.email',
         port: 587,
         secure: false, // true for 465, false for other ports
         auth: {
-            user: user, // generated ethereal user
-            pass: pass // generated ethereal password
+            user: testAccount.user, // generated ethereal user
+            pass: testAccount.spass // generated ethereal password
         },
         tls: {
             rejectUnauthorized: false
